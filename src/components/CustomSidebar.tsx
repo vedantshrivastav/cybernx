@@ -36,7 +36,7 @@ function CustomSidebar() {
   return (
     <div className="relative flex">
       <aside
-        className={`bg-white dark:bg-gray-800 p-4 transition-all duration-300 ease-in-out ${
+        className={`bg-gray-100 dark:bg-gray-800 p-4 transition-all duration-300 ease-in-out ${
           isExpanded ? 'w-64' : 'w-16'
         } min-h-screen overflow-hidden`}
       >
@@ -58,7 +58,7 @@ function CustomSidebar() {
           <Button
             onClick={() => router.push('/dashboard')}
             variant="ghost"
-            className={`w-full justify-start ${!isExpanded && 'px-2'}`}
+            className={`w-full cursor-pointer justify-start  ${!isExpanded && 'px-2'}`}
           >
             <Home className="h-4 w-4" />
             {showText && <span className={`ml-2 whitespace-nowrap transition-[visibility] duration-0 ${isExpanded ? 'visible' : 'invisible'}`}>Dashboard</span>}
@@ -67,7 +67,7 @@ function CustomSidebar() {
           <Button
             onClick={() => router.push('/vendorlist')}
             variant="ghost"
-            className={`w-full justify-start ${!isExpanded && 'px-2'}`}
+            className={`w-full cursor-pointer justify-start ${!isExpanded && 'px-2'}`}
           >
             <Users className="h-4 w-4" />
             {showText && <span className="ml-2">Minimal Vendors</span>}
@@ -76,7 +76,7 @@ function CustomSidebar() {
           <Button
             onClick={() => router.push('/enhanced-vendorlist')}
             variant="ghost"
-            className={`w-full justify-start ${!isExpanded && 'px-2'}`}
+            className={`w-full cursor-pointer justify-start ${!isExpanded && 'px-2'}`}
           >
             <FileText className="h-4 w-4" />
             {showText && <span className="ml-2">Detailed Vendors</span>}

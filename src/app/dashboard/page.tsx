@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import { useUser, useClerk } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,43 +17,108 @@ import { Moon, Sun, Search, Home, Users, FileText, Settings, LogOut, Info, Sideb
 import { useRouter } from 'next/navigation'
 import CustomSidebar from '@/components/CustomSidebar';
 
-// Mock data for demonstration
-const vendors = [
-  { id: 1, name: "Acme Corp", type: "Supplier", criticality: "High", status: "Active", contact: "john@acme.com", serviceProvided: "Raw Materials" },
-  { id: 2, name: "TechPro Solutions", type: "Service Provider", criticality: "Medium", status: "Active", contact: "sarah@techpro.com", serviceProvided: "IT Support" },
-  { id: 3, name: "Global Logistics", type: "Logistics", criticality: "Critical", status: "Active", contact: "mike@globallogistics.com", serviceProvided: "Shipping" },
-  { id: 4, name: "EcoPackage", type: "Supplier", criticality: "Low", status: "Inactive", contact: "lisa@ecopackage.com", serviceProvided: "Packaging Materials" },
-  { id: 5, name: "SecureNet", type: "Service Provider", criticality: "High", status: "Pending", contact: "alex@securenet.com", serviceProvided: "Cybersecurity" },
-]
-
-const vendorTypeData = [
-  { name: 'Supplier', value: 2 },
-  { name: 'Service Provider', value: 2 },
-  { name: 'Logistics', value: 1 },
-]
-
-const criticalityData = [
-  { name: 'Low', value: 1 },
-  { name: 'Medium', value: 1 },
-  { name: 'High', value: 2 },
-  { name: 'Critical', value: 1 },
-]
-
-const statusData = [
-  { name: 'Active', value: 3 },
-  { name: 'Inactive', value: 1 },
-  { name: 'Pending', value: 1 },
-]
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
+// Define Vendor interface to match backend structure
+interface Vendor {
+  id: string;
+  name: string;
+  type: string;
+  criticality: "Low" | "Medium" | "High" | "Critical";
+  status: "Active" | "Inactive" | "Under Review" | "Pending";
+  contact: string;
+  serviceProvided: string
+}
 
 export default function EnhancedVendorDashboard() {
-  // const { user } = useUser();
-  // const { signOut } = useClerk();
   const router = useRouter();
   const [isDarkTheme, setIsDarkTheme] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [vendors, setVendors] = useState<Vendor[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  // Prepare chart data
+  const uniqueVendorTypes = [...new Set(vendors.map(v => v.type))];
+  const vendorTypeData = uniqueVendorTypes.map(type => ({
+    name: type,
+    value: vendors.filter(v => v.type === type).length
+  }));
 
+  const criticalityData = [
+    { name: 'Low', value: vendors.filter(v => v.criticality === 'Low').length },
+    { name: 'Medium', value: vendors.filter(v => v.criticality === 'Medium').length },
+    { name: 'High', value: vendors.filter(v => v.criticality === 'High').length },
+    { name: 'Critical', value: vendors.filter(v => v.criticality === 'Critical').length },
+  ]
+
+  const statusData = [
+    { name: 'Active', value: vendors.filter(v => v.status === 'Active').length },
+    { name: 'Inactive', value: vendors.filter(v => v.status === 'Inactive').length },
+    { name: 'Under Review', value: vendors.filter(v => v.status === 'Under Review').length },
+  ]
+
+  // const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
+  // Dynamic color generation
+  const generateColors = (count: number) => {
+    const baseColors = [
+      '#0088FE', // Blue
+      '#00C49F', // Teal
+      '#FFBB28', // Yellow
+      '#FF8042', // Orange
+      '#8884D8', // Purple
+      '#82CA9D', // Green
+      '#FF6384', // Pink
+      '#36A2EB', // Light Blue
+      '#FFCE56', // Gold
+      '#4BC0C0'  // Turquoise
+    ];
+
+    // If more colors are needed than base colors, generate additional colors
+    if (count > baseColors.length) {
+      const additionalColors = Array.from({ length: count - baseColors.length }, () =>
+        `#${Math.floor(Math.random() * 16777215).toString(16)}`
+      );
+      return [...baseColors, ...additionalColors];
+    }
+
+    return baseColors.slice(0, count);
+  };
+
+  // Generate colors based on unique vendor types
+  const COLORS = generateColors(uniqueVendorTypes.length);
+
+  // Fetch vendors from backend
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        setIsLoading(true)
+        // Replace with your actual backend endpoint
+        const response = await axios.get('http://localhost:5000/vendors')
+
+        // Log the entire response to understand its structure
+        console.log("Full response:", response.data)
+
+        // Determine the correct way to extract vendors
+        const vendorsData = Array.isArray(response.data)
+          ? response.data
+          : response.data.vendors || response.data.data || []
+
+        console.log("Extracted vendors:", vendorsData)
+        console.log("Vendors type:", typeof vendorsData)
+        console.log("Is Array:", Array.isArray(vendorsData))
+
+        setVendors(vendorsData)
+        setError(null)
+      } catch (err) {
+        setError('Failed to fetch vendors. Please try again later.')
+        console.error('Vendor fetch error:', err)
+        setVendors([]) // Ensure vendors is an empty array on error
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchVendors()
+  }, [])
 
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme)
@@ -61,7 +127,7 @@ export default function EnhancedVendorDashboard() {
   const filteredVendors = vendors.filter(vendor =>
     vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     vendor.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vendor.serviceProvided.toLowerCase().includes(searchTerm.toLowerCase())
+    vendor.contact.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const getCriticalityColor = (criticality: string) => {
@@ -85,31 +151,71 @@ export default function EnhancedVendorDashboard() {
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
       case 'inactive':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-      case 'pending':
+      case 'under review':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
     }
   }
 
+  // Toggle sidebar function
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
+  }
+
+  // Loading and error states
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center w-full min-h-screen overflow-x-hidden">
+        <div className="text-center">
+          <div role="status">
+            <svg aria-hidden="true" className="inline w-10 h-10 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+              <path d="M93.9676 39.0409C96.393 38.4119 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7987 32.2913 88.1235 35.8758C89.0207 38.2158 91.5126 39.6781 93.9676 39.0409Z" fill="currentFill" />
+            </svg>
+            <span className="sr-only">Loading...</span>
+          </div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading vendors...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-red-50 dark:bg-red-900">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 dark:text-red-300 mb-4">Error</h2>
+          <p className="text-red-500 dark:text-red-200">{error}</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={`min-h-screen ${isDarkTheme ? 'dark' : ''}`}>
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300">
-        <div className="flex">
+        <div className="flex relative">
           {/* Sidebar */}
-          <CustomSidebar/>
+          {/* <CustomSidebar/> */}
+          <div>
+            <CustomSidebar />
+          </div>
 
           {/* Main content */}
-          <main className="flex-1 p-8">
+          <main className={`  flex-1 p-4 sm:p-8 
+  transition-all duration-300 
+  ${isSidebarOpen
+              ? 'md:ml-64 w-[calc(100%-16rem)]'  // When sidebar is open
+              : 'md:ml-0 w-full'}  // When sidebar is closed
+  overflow-x-hidden`}>
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vendor Dashboard</h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Welcome, User</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Sun className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                <Switch checked={isDarkTheme} onCheckedChange={toggleTheme} />
-                <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               </div>
             </div>
 
@@ -202,30 +308,30 @@ export default function EnhancedVendorDashboard() {
                   </ChartContainer>
                 </CardContent> */}
                 <CardContent className="w-full">
-  <ChartContainer config={{}} className="h-[300px] w-full">
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart 
-        data={criticalityData}
-        margin={{ left: 10, right: 10, top: 10, bottom: 10 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis 
-          dataKey="name" 
-          axisLine={false}
-          tickLine={false}
-        />
-        <YAxis axisLine={false} tickLine={false} />
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <Legend />
-        <Bar 
-          dataKey="value" 
-          fill="#8884d8" 
-          radius={[4, 4, 0, 0]}  // Optional: rounded top corners
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  </ChartContainer>
-</CardContent>
+                  <ChartContainer config={{}} className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={criticalityData}
+                        margin={{ left: 10, right: 10, top: 10, bottom: 10 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis axisLine={false} tickLine={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Legend />
+                        <Bar
+                          dataKey="value"
+                          fill="#8884d8"
+                          radius={[4, 4, 0, 0]}  // Optional: rounded top corners
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
               </Card>
             </div>
 
@@ -262,48 +368,34 @@ export default function EnhancedVendorDashboard() {
                         <TableHead className="text-gray-700 dark:text-gray-300">Status</TableHead>
                         <TableHead className="text-gray-700 dark:text-gray-300">Contact</TableHead>
                         <TableHead className="text-gray-700 dark:text-gray-300">Service Provided</TableHead>
-                        <TableHead className="text-gray-700 dark:text-gray-300">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredVendors.map((vendor) => (
-                        <TableRow key={vendor.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                          <TableCell className="font-medium text-gray-900 dark:text-gray-100">{vendor.name}</TableCell>
-                          <TableCell className="text-gray-700 dark:text-gray-300">{vendor.type}</TableCell>
-                          <TableCell>
-                            <Badge  className={`${getCriticalityColor(vendor.criticality)}`}>
-                              {vendor.criticality}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={`${getStatusColor(vendor.status)}`}>
-                              {vendor.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-gray-700 dark:text-gray-300">{vendor.contact}</TableCell>
-                          <TableCell className="text-gray-700 dark:text-gray-300">{vendor.serviceProvided}</TableCell>
-                          <TableCell>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-100 dark:hover:bg-blue-800"
-                                    onClick={() => console.log(`Open details for ${vendor.name}`)}
-                                  >
-                                    <Info className="h-4 w-4 mr-1" />
-                                    Details
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>View vendor details</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                    {filteredVendors.slice(0, 5).map((vendor) => (
+  <TableRow key={vendor.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+    <TableCell className="font-medium text-gray-900 dark:text-gray-100">
+      {vendor.name}
+    </TableCell>
+    <TableCell className="text-gray-700 dark:text-gray-300">{vendor.type}</TableCell>
+    <TableCell>
+      <Badge className={`${getCriticalityColor(vendor.criticality)}`}>
+        {vendor.criticality}
+      </Badge>
+    </TableCell>
+    <TableCell>
+      <Badge className={`${getStatusColor(vendor.status)}`}>
+        {vendor.status}
+      </Badge>
+    </TableCell>
+    <TableCell className="text-gray-700 dark:text-gray-300">
+      {vendor.contact}
+    </TableCell>
+    <TableCell className="text-gray-700 dark:text-gray-300">
+      {vendor.serviceProvided}
+    </TableCell>
+  </TableRow>
+))}
+
                     </TableBody>
                   </Table>
                 </div>

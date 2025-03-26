@@ -44,6 +44,8 @@ export default function VendorListView() {
   const [searchTerm, setSearchTerm] = useState("")
   const [vendors, setVendors] = useState(initialVendors)
   const [isFormOpen, setIsFormOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
   
   // Form state
   const [formData, setFormData] = useState({
@@ -53,6 +55,40 @@ export default function VendorListView() {
     status: "Active",
     contact: ""
   })
+
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        setIsLoading(true)
+        // Replace with your actual backend endpoint
+        const response = await axios.get('http://localhost:5000/vendors')
+        
+        // Log the entire response to understand its structure
+        console.log("Full response:", response.data)
+
+        // Determine the correct way to extract vendors
+        const vendorsData = Array.isArray(response.data) 
+          ? response.data 
+          : response.data.vendors || response.data.data || []
+        
+        console.log("Extracted vendors:", vendorsData)
+        console.log("Vendors type:", typeof vendorsData)
+        console.log("Is Array:", Array.isArray(vendorsData))
+
+        setVendors(vendorsData)
+        setError(null)
+      } catch (err) {
+        setError('Failed to fetch vendors. Please try again later.')
+        console.error('Vendor fetch error:', err)
+        setVendors([]) // Ensure vendors is an empty array on error
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchVendors()
+  }, [])
+
 
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme)
@@ -160,6 +196,23 @@ export default function VendorListView() {
     return formData.name && formData.type && formData.criticality && formData.status && formData.contact
   }
 
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Loading vendors...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-500">
+        <p>{error}</p>
+      </div>
+    )
+  }
+
   return (
     <div className={isDarkTheme ? 'dark' : ''}>
       <div className="flex bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300">
@@ -171,15 +224,8 @@ export default function VendorListView() {
         {/* Main Content Area with Header */}
         <div className="w-full flex flex-col">
           {/* Header */}
-          <div className="sticky top-0 bg-white dark:bg-gray-800 p-4 shadow-md z-5">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vendor Management</h1>
-              {/* <div className="flex items-center space-x-2">
-                <Sun className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                <Switch checked={isDarkTheme} onCheckedChange={toggleTheme} />
-                <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              </div> */}
-            </div>
+          <div className="sticky top-0 bg-white dark:bg-gray-800 p-4 shadow-md z-5 wl-full rounded-lg ml-6 mt-4 mr-6 flex justify-center items-center">
+             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vendor Management</h1>
           </div>
           
           {/* Page Content */}
@@ -217,7 +263,7 @@ export default function VendorListView() {
                       <TableHead className="text-left dark:text-gray-300">Contact</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
+                  {/* <TableBody>
                     {filteredVendors.map((vendor) => (
                       <TableRow key={vendor.name} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <TableCell className="font-medium dark:text-gray-300">{vendor.name}</TableCell>
@@ -235,7 +281,34 @@ export default function VendorListView() {
                         <TableCell className="dark:text-gray-300">{vendor.contact}</TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
+                  </TableBody> */}
+                  <TableBody>
+          {filteredVendors.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center dark:text-gray-300">
+                No vendors found
+              </TableCell>
+            </TableRow>
+          ) : (
+            filteredVendors.map((vendor) => (
+              <TableRow key={vendor.id || vendor.name} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <TableCell className="font-medium dark:text-gray-300">{vendor.name}</TableCell>
+                <TableCell className="dark:text-gray-300">{vendor.type}</TableCell>
+                <TableCell>
+                  <Badge className={`font-semibold ${getCriticalityColor(vendor.criticality)}`}>
+                    {vendor.criticality}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge className={`font-semibold ${getStatusColor(vendor.status)}`}>
+                    {vendor.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="dark:text-gray-300">{vendor.contact}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
                 </Table>
               </CardContent>
             </Card>
@@ -264,24 +337,17 @@ export default function VendorListView() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-right dark:text-gray-300">
-                Type
-              </Label>
-              <Select 
-                onValueChange={(value) => handleSelectChange("type", value)} 
-                value={formData.type}
-              >
-                <SelectTrigger className="col-span-3 dark:bg-gray-700 dark:text-gray-100">
-                  <SelectValue placeholder="Select vendor type" />
-                </SelectTrigger>
-                <SelectContent className="dark:bg-gray-700 dark:text-gray-100">
-                  <SelectItem value="Supplier">Supplier</SelectItem>
-                  <SelectItem value="Service Provider">Service Provider</SelectItem>
-                  <SelectItem value="Logistics">Logistics</SelectItem>
-                  <SelectItem value="Technology">Technology</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+  <Label htmlFor="type" className="text-right dark:text-gray-300">
+    Type
+  </Label>
+  <Input
+    id="type"
+    placeholder="Enter vendor type"
+    value={formData.type}
+    onChange={(e) => handleSelectChange("type", e.target.value)}
+    className="col-span-3 dark:bg-gray-700 dark:text-gray-100"
+  />
+</div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="criticality" className="text-right dark:text-gray-300">
                 Criticality

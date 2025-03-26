@@ -1,22 +1,54 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Sun, Moon } from "lucide-react";
-import AuthButtons from "@/components/auth-buttons";
 import { useDarkMode } from "@/components/darkModeContext";
-import { useUser } from "@clerk/clerk-react";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const [isMounted, setIsMounted] = useState(false);
   const { darkMode, toggleDarkMode } = useDarkMode();
+  const router = useRouter();
+
+  // Ensure component is mounted before rendering client-side specific content
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handleLogoClick = () => {
+    router.push('/dashbord');
+  };
+
+  // If not mounted, return null or a placeholder
+  if (!isMounted) {
+    return (
+      <header className="w-full py-4">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <h1>Vendor's Hub</h1>
+        </div>
+      </header>
+    );
+  }
 
   return (
-    <header className={`border-b ${darkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"} w-full py-4`}>
+    <header className={`border-b ${darkMode ? "bg-gray-900 border-gray-700" : "bg-gray-100 border-gray-200"} w-full py-4`}>
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        {/* Logo / Brand - Updated with same styling as hero heading */}
         <h1 className={`text-2xl md:text-5xl font-bold mb-6  ${darkMode ? "text-white" : "text-gray-900"}`}>
-        <span className="text-blue-600">Vendor's</span> Hub
+          <span 
+            onClick={handleLogoClick} 
+            className="text-blue-600 cursor-pointer"
+          >
+            Vendor's
+          </span>
+          {' '}
+          <span 
+            onClick={handleLogoClick} 
+            className="text-blue-600 cursor-pointer"
+          >
+            Hub
+          </span>
         </h1>
 
-        {/* Navigation & Theme Toggle */}
         <div className="flex items-center gap-4">
           <button
             onClick={toggleDarkMode}
@@ -25,8 +57,6 @@ export default function Header() {
           >
             {darkMode ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6 text-gray-600" />}
           </button>
-
-          {/* <AuthButtons /> */}
         </div>
       </div>
     </header>

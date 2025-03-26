@@ -24,7 +24,6 @@ export default function EnhancedVendorListView() {
     serviceProvided: string;
   };
 
-  const [isDarkTheme, setIsDarkTheme] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([])
@@ -62,7 +61,7 @@ export default function EnhancedVendorListView() {
   )
 
   return (
-    <div className={`min-h-screen flex ${isDarkTheme ? 'dark' : ''}`}>
+    <div className={`min-h-screen flex`}>
       <CustomSidebar />
 
       <div className="flex-1 min-h-screen p-8 bg-gray-100 dark:bg-gray-900 transition-colors duration-300">

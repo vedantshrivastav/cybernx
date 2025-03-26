@@ -52,7 +52,7 @@ export default function Header() {
             onClick={handleLogoClick}
             className="text-blue-600 cursor-pointer"
           >
-            Vendor's
+            Vendor&apos;s
           </span>
           {' '}
           <span

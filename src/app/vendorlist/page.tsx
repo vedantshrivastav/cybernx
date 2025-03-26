@@ -39,7 +39,6 @@ const initialVendors = [
 ];
 
 export default function VendorListView() {
-  const [isDarkTheme, setIsDarkTheme] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [vendors, setVendors] = useState(initialVendors)
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -89,9 +88,7 @@ export default function VendorListView() {
   }, [])
 
 
-  // const toggleTheme = () => {
-  //   setIsDarkTheme(!isDarkTheme)
-  // }
+
 
   const openForm = () => {
     setFormData({
@@ -213,7 +210,7 @@ export default function VendorListView() {
   }
 
   return (
-    <div className={isDarkTheme ? 'dark' : ''}>
+    <div>
       <div className="flex bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300">
         {/* Sidebar */}
         <div>

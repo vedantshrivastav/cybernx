@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid,  Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import {  Search, Users} from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import CustomSidebar from '@/components/CustomSidebar';
 
 // Define Vendor interface to match backend structure
@@ -26,13 +25,12 @@ interface Vendor {
 }
 
 export default function EnhancedVendorDashboard() {
-  const router = useRouter();
-  const [isDarkTheme, setIsDarkTheme] = useState(false)
+  // const [isDarkTheme, setIsDarkTheme] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  // const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   // Prepare chart data
   const uniqueVendorTypes = [...new Set(vendors.map(v => v.type))];
   const vendorTypeData = uniqueVendorTypes.map(type => ({
@@ -47,11 +45,6 @@ export default function EnhancedVendorDashboard() {
     { name: 'Critical', value: vendors.filter(v => v.criticality === 'Critical').length },
   ]
 
-  const statusData = [
-    { name: 'Active', value: vendors.filter(v => v.status === 'Active').length },
-    { name: 'Inactive', value: vendors.filter(v => v.status === 'Inactive').length },
-    { name: 'Under Review', value: vendors.filter(v => v.status === 'Under Review').length },
-  ]
 
   // const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
   // Dynamic color generation
@@ -193,7 +186,7 @@ export default function EnhancedVendorDashboard() {
   }
 
   return (
-    <div className={`min-h-screen ${isDarkTheme ? 'dark' : ''}`}>
+    <div className={`min-h-screen`}>
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300">
         <div className="flex relative">
           {/* Sidebar */}
@@ -204,8 +197,7 @@ export default function EnhancedVendorDashboard() {
 
           {/* Main content */}
           <main className={`  flex-1 p-4 sm:p-8 
-  transition-all duration-300 
-  ${isSidebarOpen
+  transition-all duration-300
               ? 'md:ml-64 w-[calc(100%-16rem)]'  // When sidebar is open
               : 'md:ml-0 w-full'}  // When sidebar is closed
   overflow-x-hidden`}>

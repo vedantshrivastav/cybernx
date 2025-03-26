@@ -1,11 +1,8 @@
 "use client"
 import React, { useEffect } from "react";
-import { Building2, BarChart, Shield, Users2, PlusCircle, PieChart } from "lucide-react";
-import Header from "./Header";
+import { Building2, BarChart, PlusCircle, PieChart } from "lucide-react";
 import { useDarkMode } from "@/components/darkModeContext";
 import { useRouter } from "next/navigation"; // ✅ Use `next/navigation` in App Router
-import { useUser } from "@clerk/clerk-react";
-import Link from "next/link";
 
 const LandingPage: React.FC = () => {
   const { darkMode } = useDarkMode();
@@ -33,10 +30,10 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${darkMode ? "text-white" : "text-gray-900"}`}>
-            Effortless <span className="text-blue-600">Vendor Management </span> at Your Fingertips
+              Effortless <span className="text-blue-600">Vendor Management </span> at Your Fingertips
             </h1>
             <p className={`text-lg mb-8 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
-            Vendor's Hub simplifies vendor onboarding, tracks performance, and provides a centralized dashboard to add and view vendors—helping you optimize your supply chain efficiently, all in one place
+            Vendor&apos;s Hub simplifies vendor onboarding, tracks performance, and provides a centralized dashboard to add and view vendors—helping you optimize your supply chain efficiently, all in one place
             </p>
             <div className="space-x-4">
               <button onClick={() => router.push('./dashboard')} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
@@ -52,13 +49,13 @@ const LandingPage: React.FC = () => {
               loading="lazy"
             /> */}
             <video
-  src="/video/Managment_video.mp4"
-  className="rounded-lg shadow-2xl w-full"
-  autoPlay
-  loop
-  muted
-  playsInline
-></video>
+              src="/video/Managment_video.mp4"
+              className="rounded-lg shadow-2xl w-full"
+              autoPlay
+              loop
+              muted
+              playsInline
+            ></video>
 
           </div>
         </div>
@@ -71,18 +68,18 @@ const LandingPage: React.FC = () => {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <FeatureCard icon={<Building2 className="w-8 h-8 text-blue-600" />} title="Vendor Onboarding" description="Streamline the process of adding and qualifying new vendors" />
-          <FeatureCard icon={<BarChart className="w-8 h-8 text-blue-600" />} title="Performance Tracking" description="Monitor and evaluate vendor performance metrics" />  
-<FeatureCard icon={<PieChart className="w-8 h-8 text-blue-600" />} title="Vendor Analytics" description="Track vendor performance with insightful metrics" />
-  
-<FeatureCard icon={<PlusCircle className="w-8 h-8 text-blue-600" />} title="Easy Onboarding" description="Seamlessly add and manage vendors in one place" />
+          <FeatureCard icon={<BarChart className="w-8 h-8 text-blue-600" />} title="Performance Tracking" description="Monitor and evaluate vendor performance metrics" />
+          <FeatureCard icon={<PieChart className="w-8 h-8 text-blue-600" />} title="Vendor Analytics" description="Track vendor performance with insightful metrics" />
+
+          <FeatureCard icon={<PlusCircle className="w-8 h-8 text-blue-600" />} title="Easy Onboarding" description="Seamlessly add and manage vendors in one place" />
 
         </div>
       </div>
 
       {/* CTA Section */}
-      <div className={`${darkMode ? "bg-blue-900" : "bg-blue-600"} text-white py-16 text-center`}> 
+      <div className={`${darkMode ? "bg-blue-900" : "bg-blue-600"} text-white py-16 text-center`}>
         <h2 className="text-3xl font-bold mb-4">Ready to transform your vendor management?</h2>
-        <p className="text-lg mb-8 text-blue-100">Join thousands of companies already using Vendor's Hub</p>
+        <p className="text-lg mb-8 text-blue-100">Join thousands of companies already using Vendor&apos;s Hub</p>
         <button onClick={() => router.push('/dashboard')} className={`${darkMode ? "bg-white text-blue-900" : "bg-white text-blue-600"} px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition duration-300`}>
           Get Started
         </button>

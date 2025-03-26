@@ -65,47 +65,10 @@ export default function EnhancedVendorDashboard() {
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [vendorHistory, setVendorHistory] = useState({
-    totalVendors: {
-      current: 0,
-      previous: 0
-    },
-    activeVendors: {
-      current: 0,
-      previous: 0
-    },
-    criticalVendors: {
-      current: 0,
-      previous: 0
-    },
-  });
   const [selectedVendorCategory, setSelectedVendorCategory] = useState<'total' | 'active' | 'critical' | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Function to update historical data
-  const updateVendorHistory = (vendors: Vendor[]) => {
-    setVendorHistory({
-      totalVendors: {
-        current: vendors.length,
-        previous: vendors.length - Math.floor(vendors.length * 0.1) // Example calculation
-      },
-      activeVendors: {
-        current: vendors.filter(v => v.status === 'Active').length,
-        previous: vendors.filter(v => v.status === 'Active').length - Math.floor(vendors.filter(v => v.status === 'Active').length * 0.05)
-      },
-      criticalVendors: {
-        current: vendors.filter(v => v.criticality === 'Critical').length,
-        previous: vendors.filter(v => v.criticality === 'Critical').length - Math.floor(vendors.filter(v => v.criticality === 'Critical').length * 0.05)
-      },
-    });
-  };
-
-  // Update historical data when vendors are fetched
-  useEffect(() => {
-    if (vendors.length > 0) {
-      updateVendorHistory(vendors);
-    }
-  }, [vendors]);
 
   // Prepare chart data
   const uniqueVendorTypes = [...new Set(vendors.map(v => v.type))];

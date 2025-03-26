@@ -199,8 +199,8 @@ export default function VendorListView() {
   }
 
   return (
-    <div>
-      <div className="flex bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    <div className='overflow-hidden'>
+      <div className="flex bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300 w-full">
         {/* Sidebar */}
         <div>
           <CustomSidebar />
@@ -232,7 +232,7 @@ export default function VendorListView() {
                     <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   </div>
                   <Button
-                    className="bg-blue-700 hover:bg-blue-800 text-white"
+                    className="bg-blue-700 hover:bg-blue-800 text-white cursor-pointer"
                     onClick={openForm}
                   >
                     Add New Vendor
@@ -388,7 +388,7 @@ export default function VendorListView() {
             </DialogClose>
             <Button
               type="submit"
-              className="bg-blue-700 hover:bg-blue-800 text-white"
+              className="bg-blue-700 hover:bg-blue-800 text-white cursor-pointer"
               onClick={createVendor}
               disabled={!validateForm()}
             >

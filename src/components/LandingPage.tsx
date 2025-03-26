@@ -23,7 +23,7 @@ const LandingPage: React.FC = () => {
 
 
   return (
-    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}>
       {/* <Header /> */}
       {/* Hero Section */}
       <div className="relative overflow-hidden py-16">
@@ -36,7 +36,7 @@ const LandingPage: React.FC = () => {
             Vendor&apos;s Hub simplifies vendor onboarding, tracks performance, and provides a centralized dashboard to add and view vendors—helping you optimize your supply chain efficiently, all in one place
             </p>
             <div className="space-x-4">
-              <button onClick={() => router.push('./dashboard')} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+              <button onClick={() => router.push('./dashboard')} className="bg-blue-600 cursor-pointer text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
                 Get Started
               </button>
             </div>
@@ -80,7 +80,7 @@ const LandingPage: React.FC = () => {
       <div className={`${darkMode ? "bg-blue-900" : "bg-blue-600"} text-white py-16 text-center`}>
         <h2 className="text-3xl font-bold mb-4">Ready to transform your vendor management?</h2>
         <p className="text-lg mb-8 text-blue-100">Join thousands of companies already using Vendor&apos;s Hub</p>
-        <button onClick={() => router.push('/dashboard')} className={`${darkMode ? "bg-white text-blue-900" : "bg-white text-blue-600"} px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition duration-300`}>
+        <button onClick={() => router.push('/dashboard')} className={`cursor-pointer ${darkMode ? "bg-white text-blue-900" : "bg-white text-blue-600"} px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition duration-300`}>
           Get Started
         </button>
       </div>

@@ -64,7 +64,7 @@ export default function EnhancedVendorListView() {
     <div className={`min-h-screen flex`}>
       <CustomSidebar />
 
-      <div className="flex-1 min-h-screen p-8 bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+      <div className="flex-1 min-h-screen p-8 bg-gray-100 dark:bg-gray-900 transition-colors duration-300 w-screen">
         <Card className="w-full bg-white dark:bg-gray-800 shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between border-b dark:border-gray-700">
             <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vendor List</CardTitle>

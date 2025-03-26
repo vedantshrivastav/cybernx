@@ -9,10 +9,11 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid,  Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import {  Search, Users} from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts'
+import { AlertTriangle, Search, Users } from 'lucide-react'
 import CustomSidebar from '@/components/CustomSidebar';
-
+import { TrendingUp, TrendingDown } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 // Define Vendor interface to match backend structure
 interface Vendor {
   id: string;
@@ -24,13 +25,88 @@ interface Vendor {
   serviceProvided: string
 }
 
+const calculatePercentageChange = (currentValue: number, previousValue: number): number => {
+  if (previousValue === 0) return 0;
+  return ((currentValue - previousValue) / previousValue) * 100;
+};
+
+// Component to display percentage change with dynamic styling
+const PercentageChangeIndicator = ({
+  currentValue,
+  previousValue
+}: {
+  currentValue: number,
+  previousValue: number
+}) => {
+  const percentageChange = calculatePercentageChange(currentValue, previousValue);
+  const isPositive = percentageChange >= 0;
+
+  return (
+    <div className="flex items-center">
+      {isPositive ? (
+        <TrendingUp className="h-4 w-4 mr-1 text-green-500" />
+      ) : (
+        <TrendingDown className="h-4 w-4 mr-1 text-red-500" />
+      )}
+      <span className={`text-xs font-semibold ${isPositive
+          ? 'text-green-600 dark:text-green-400'
+          : 'text-red-600 dark:text-red-400'
+        }`}>
+        {Math.abs(percentageChange).toFixed(1)}%
+        {isPositive ? ' ▲' : ' ▼'}
+      </span>
+    </div>
+  );
+};
+
 export default function EnhancedVendorDashboard() {
   // const [isDarkTheme, setIsDarkTheme] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [vendorHistory, setVendorHistory] = useState({
+    totalVendors: {
+      current: 0,
+      previous: 0
+    },
+    activeVendors: {
+      current: 0,
+      previous: 0
+    },
+    criticalVendors: {
+      current: 0,
+      previous: 0
+    },
+  });
+  const [selectedVendorCategory, setSelectedVendorCategory] = useState<'total' | 'active' | 'critical' | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Function to update historical data
+  const updateVendorHistory = (vendors: Vendor[]) => {
+    setVendorHistory({
+      totalVendors: {
+        current: vendors.length,
+        previous: vendors.length - Math.floor(vendors.length * 0.1) // Example calculation
+      },
+      activeVendors: {
+        current: vendors.filter(v => v.status === 'Active').length,
+        previous: vendors.filter(v => v.status === 'Active').length - Math.floor(vendors.filter(v => v.status === 'Active').length * 0.05)
+      },
+      criticalVendors: {
+        current: vendors.filter(v => v.criticality === 'Critical').length,
+        previous: vendors.filter(v => v.criticality === 'Critical').length - Math.floor(vendors.filter(v => v.criticality === 'Critical').length * 0.05)
+      },
+    });
+  };
+
+  // Update historical data when vendors are fetched
+  useEffect(() => {
+    if (vendors.length > 0) {
+      updateVendorHistory(vendors);
+    }
+  }, [vendors]);
+
   // Prepare chart data
   const uniqueVendorTypes = [...new Set(vendors.map(v => v.type))];
   const vendorTypeData = uniqueVendorTypes.map(type => ({
@@ -44,6 +120,25 @@ export default function EnhancedVendorDashboard() {
     { name: 'High', value: vendors.filter(v => v.criticality === 'High').length },
     { name: 'Critical', value: vendors.filter(v => v.criticality === 'Critical').length },
   ]
+
+  const openVendorModal = (category: 'total' | 'active' | 'critical') => {
+    setSelectedVendorCategory(category)
+    setIsModalOpen(true)
+  }
+
+  // Filter vendors based on selected category
+  const getFilteredVendorsForModal = () => {
+    switch (selectedVendorCategory) {
+      case 'total':
+        return vendors
+      case 'active':
+        return vendors.filter(v => v.status === 'Active')
+      case 'critical':
+        return vendors.filter(v => v.criticality === 'Critical')
+      default:
+        return []
+    }
+  }
 
 
   // const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
@@ -210,74 +305,126 @@ export default function EnhancedVendorDashboard() {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card className="bg-blue-50 dark:bg-blue-900">
+              <Card className="bg-blue-50 dark:bg-blue-900 cursor-pointer"
+                onClick={() => openVendorModal('total')}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-100">Total Vendors</CardTitle>
+                  <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-100">
+                    Total Vendors
+                  </CardTitle>
                   <Users className="h-4 w-4 text-blue-600 dark:text-blue-300" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-900 dark:text-blue-50">{vendors.length}</div>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-50">
+                      {vendors.length}
+                    </div>
+                    <PercentageChangeIndicator
+                      currentValue={vendors.length}
+                      previousValue={Math.max(0, vendors.length - 5)} // Simple previous period calculation
+                    />
+                  </div>
                 </CardContent>
               </Card>
-              <Card className="bg-green-50 dark:bg-green-900">
+              {/* Active Vendors Card */}
+              <Card className="bg-green-50 dark:bg-green-900 cursor-pointer" onClick={() => openVendorModal('active')}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-green-800 dark:text-green-100">Active Vendors</CardTitle>
+                  <CardTitle className="text-sm font-medium text-green-800 dark:text-green-100">
+                    Active Vendors
+                  </CardTitle>
                   <Users className="h-4 w-4 text-green-600 dark:text-green-300" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-900 dark:text-green-50">{vendors.filter(v => v.status === 'Active').length}</div>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-2xl font-bold text-green-900 dark:text-green-50">
+                      {vendors.filter(v => v.status === 'Active').length}
+                    </div>
+                    <PercentageChangeIndicator
+                      currentValue={vendors.filter(v => v.status === 'Active').length}
+                      previousValue={Math.max(0, vendors.filter(v => v.status === 'Active').length - 3)} // Simple previous period calculation
+                    />
+                  </div>
                 </CardContent>
               </Card>
-              <Card className="bg-red-50 dark:bg-red-900">
+              {/* Critical Vendors Card */}
+              <Card className="bg-red-50 dark:bg-red-900 cursor-pointer" onClick={() => openVendorModal('critical')}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-red-800 dark:text-red-100">Critical Vendors</CardTitle>
-                  <Users className="h-4 w-4 text-red-600 dark:text-red-300" />
+                  <CardTitle className="text-sm font-medium text-red-800 dark:text-red-100">
+                    Critical Vendors
+                  </CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-300" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-900 dark:text-red-50">{vendors.filter(v => v.criticality === 'Critical').length}</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-yellow-50 dark:bg-yellow-900">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-100">Pending Vendors</CardTitle>
-                  <Users className="h-4 w-4 text-yellow-600 dark:text-yellow-300" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-50">{vendors.filter(v => v.status === 'Pending').length}</div>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-2xl font-bold text-red-900 dark:text-red-50">
+                      {vendors.filter(v => v.criticality === 'Critical').length}
+                    </div>
+                    <PercentageChangeIndicator
+                      currentValue={vendors.filter(v => v.criticality === 'Critical').length}
+                      previousValue={Math.max(0, vendors.filter(v => v.criticality === 'Critical').length - 1)} // Simple previous period calculation
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Vendor Types</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={{}} className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={vendorTypeData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {vendorTypeData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
+            <Card className="w-full transition-all duration-300 ease-in-out">
+      <CardHeader>
+        <CardTitle>Vendor Types</CardTitle>
+      </CardHeader>
+      <CardContent className="h-[300px] w-full transition-all duration-300 ease-in-out">
+        <ChartContainer 
+          config={{}} 
+          className="h-full w-full transition-all duration-300 ease-in-out"
+        >
+          <ResponsiveContainer 
+            width="100%" 
+            height="100%" 
+            className="transition-all duration-300 ease-in-out"
+          >
+            <PieChart className="transition-all duration-300 ease-in-out">
+              <Pie
+                data={vendorTypeData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius="80%"
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, percent }) => 
+                  `${name} ${(percent * 100).toFixed(0)}%`
+                }
+                className="transition-all duration-300 ease-in-out"
+              >
+                {vendorTypeData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[index % COLORS.length]} 
+                    className="transition-all duration-300 ease-in-out"
+                  />
+                ))}
+              </Pie>
+              <Tooltip 
+                content={<ChartTooltipContent />} 
+                cursor={{ fill: 'transparent' }}
+              />
+              <Legend 
+                layout="horizontal" 
+                verticalAlign="bottom" 
+                align="center"
+                wrapperStyle={{ 
+                  paddingTop: '10px',
+                  maxWidth: '100%',
+                  overflowX: 'auto',
+                  transition: 'all 300ms ease-in-out'
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+      </CardContent>
+    </Card>
               <Card>
                 <CardHeader>
                   <CardTitle>Vendor Criticality</CardTitle>
@@ -342,7 +489,7 @@ export default function EnhancedVendorDashboard() {
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="flex-grow bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
-                    <Button className="ml-2 bg-blue-700 hover:bg-blue-800 text-white">
+                    <Button className="ml-2 bg-blue-700 hover:bg-blue-800 text-white cursor-pointer">
                       <Search className="h-4 w-4" />
                     </Button>
                   </div>
@@ -360,30 +507,30 @@ export default function EnhancedVendorDashboard() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {filteredVendors.slice(0, 5).map((vendor) => (
-  <TableRow key={vendor.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-    <TableCell className="font-medium text-gray-900 dark:text-gray-100">
-      {vendor.name}
-    </TableCell>
-    <TableCell className="text-gray-700 dark:text-gray-300">{vendor.type}</TableCell>
-    <TableCell>
-      <Badge className={`${getCriticalityColor(vendor.criticality)}`}>
-        {vendor.criticality}
-      </Badge>
-    </TableCell>
-    <TableCell>
-      <Badge className={`${getStatusColor(vendor.status)}`}>
-        {vendor.status}
-      </Badge>
-    </TableCell>
-    <TableCell className="text-gray-700 dark:text-gray-300">
-      {vendor.contact}
-    </TableCell>
-    <TableCell className="text-gray-700 dark:text-gray-300">
-      {vendor.serviceProvided}
-    </TableCell>
-  </TableRow>
-))}
+                      {filteredVendors.slice(0, 5).map((vendor) => (
+                        <TableRow key={vendor.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <TableCell className="font-medium text-gray-900 dark:text-gray-100">
+                            {vendor.name}
+                          </TableCell>
+                          <TableCell className="text-gray-700 dark:text-gray-300">{vendor.type}</TableCell>
+                          <TableCell>
+                            <Badge className={`${getCriticalityColor(vendor.criticality)}`}>
+                              {vendor.criticality}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`${getStatusColor(vendor.status)}`}>
+                              {vendor.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-gray-700 dark:text-gray-300">
+                            {vendor.contact}
+                          </TableCell>
+                          <TableCell className="text-gray-700 dark:text-gray-300">
+                            {vendor.serviceProvided}
+                          </TableCell>
+                        </TableRow>
+                      ))}
 
                     </TableBody>
                   </Table>
@@ -392,6 +539,60 @@ export default function EnhancedVendorDashboard() {
             </Card>
           </main>
         </div>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedVendorCategory === 'total' && 'All Vendors'}
+                {selectedVendorCategory === 'active' && 'Active Vendors'}
+                {selectedVendorCategory === 'critical' && 'Critical Vendors'}
+              </DialogTitle>
+              <DialogDescription>
+                Detailed view of {
+                  selectedVendorCategory === 'total' ? 'all vendors' :
+                    selectedVendorCategory === 'active' ? 'active vendors' :
+                      'critical vendors'
+                } in your system.
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* Detailed Vendor Table */}
+            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Criticality</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Service</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {getFilteredVendorsForModal().map((vendor) => (
+                    <TableRow key={vendor.id}>
+                      <TableCell className="font-medium">{vendor.name}</TableCell>
+                      <TableCell>{vendor.type}</TableCell>
+                      <TableCell>
+                        <Badge className={getCriticalityColor(vendor.criticality)}>
+                          {vendor.criticality}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(vendor.status)}>
+                          {vendor.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{vendor.contact}</TableCell>
+                      <TableCell>{vendor.serviceProvided}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

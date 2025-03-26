@@ -45,7 +45,7 @@ export default function Header() {
   }
 
   return (
-    <header className={`border-b ${darkMode ? "bg-gray-900 border-gray-700" : "bg-gray-100 border-gray-200"} w-full py-4`}>
+      <header className={`border-b  ${darkMode ? "bg-gray-900 border-gray-700" : "bg-gray-100 border-gray-200"} py-4`}>
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <h1 className={`text-2xl md:text-5xl font-bold mb-6  ${darkMode ? "text-white" : "text-gray-900"}`}>
           <span
@@ -66,7 +66,7 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <button
             onClick={toggleDarkMode}
-            className="p-2 rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 cursor-pointer rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label="Toggle theme"
           >
             {darkMode ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6 text-gray-600" />}

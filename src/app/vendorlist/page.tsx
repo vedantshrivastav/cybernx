@@ -12,13 +12,13 @@ import axios from 'axios';
 
 import { v4 as uuidv4 } from "uuid";
 
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogFooter,
-  DialogClose 
+  DialogClose
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import {
@@ -29,46 +29,46 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-// Mock data for vendors
-const initialVendors = [
-  { id: "1", name: "Acme Corp", type: "Supplier", criticality: "High", status: "Active", contact: "john@acme.com" },
-  { id: "2", name: "TechPro Solutions", type: "Service Provider", criticality: "Medium", status: "Active", contact: "sarah@techpro.com" },
-  { id: "3", name: "Global Logistics", type: "Logistics", criticality: "Critical", status: "Under Review", contact: "mike@globallogistics.com" },
-  { id: "4", name: "Eco Friendly Materials", type: "Supplier", criticality: "Low", status: "Inactive", contact: "lisa@ecofriendly.com" },
-  { id: "5", name: "Innovative Software Inc", type: "Technology", criticality: "High", status: "Active", contact: "david@innovative.com" },
-];
-
 export default function VendorListView() {
+  type Vendor = {
+    id: string;
+    name: string;
+    type: string;
+    criticality: string;
+    status: string;
+    contact: string;
+    serviceProvided: string;
+  };
   const [searchTerm, setSearchTerm] = useState("")
-  const [vendors, setVendors] = useState(initialVendors)
+  const [vendors, setVendors] = useState<Vendor[]>([]) // Start with an empty array
   const [isFormOpen, setIsFormOpen] = useState(false)
-    const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-  
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
     type: "",
     criticality: "",
     status: "Active",
-    contact: ""
+    contact: "",
+    serviceProvided: "" // Added to match the new input field
   })
 
   useEffect(() => {
     const fetchVendors = async () => {
       try {
         setIsLoading(true)
-        // Replace with your actual backend endpoint
         const response = await axios.get('https://cybernx.onrender.com/vendors')
-        
+
         // Log the entire response to understand its structure
         console.log("Full response:", response.data)
 
         // Determine the correct way to extract vendors
-        const vendorsData = Array.isArray(response.data) 
-          ? response.data 
+        const vendorsData = Array.isArray(response.data)
+          ? response.data
           : response.data.vendors || response.data.data || []
-        
+
         console.log("Extracted vendors:", vendorsData)
         console.log("Vendors type:", typeof vendorsData)
         console.log("Is Array:", Array.isArray(vendorsData))
@@ -87,16 +87,14 @@ export default function VendorListView() {
     fetchVendors()
   }, [])
 
-
-
-
   const openForm = () => {
     setFormData({
       name: "",
       type: "",
       criticality: "",
       status: "Active",
-      contact: ""
+      contact: "",
+      serviceProvided: ""
     })
     setIsFormOpen(true)
   }
@@ -116,43 +114,35 @@ export default function VendorListView() {
     })
   }
 
-
-  
-
   const createVendor = async () => {
     const uniqueId = uuidv4();
 
     // Create new vendor object
     const newVendor = {
-        id: uniqueId, // Ensure ID is included
-        ...formData
+      id: uniqueId,
+      ...formData
     };
 
     const API_URL = "https://cybernx.onrender.com/vendors";
 
     try {
-        const response = await axios.post(API_URL, newVendor, { // Send `newVendor` instead of `formData`
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+      const response = await axios.post(API_URL, newVendor, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        console.log("Success:", response.data);
+      console.log("Success:", response.data);
 
-        // Update the vendors list
-        setVendors([...vendors, newVendor]);
+      // Update the vendors list
+      setVendors([...vendors, newVendor]);
 
-        // Close the form
-        setIsFormOpen(false);
+      // Close the form
+      setIsFormOpen(false);
     } catch (error) {
-        console.error("Error:", error);
+      console.error("Error:", error);
     }
-};
-
-     
-    
-  
-  
+  };
 
   const filteredVendors = vendors.filter(vendor =>
     vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -192,7 +182,6 @@ export default function VendorListView() {
     return formData.name && formData.type && formData.criticality && formData.status && formData.contact
   }
 
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -214,16 +203,16 @@ export default function VendorListView() {
       <div className="flex bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300">
         {/* Sidebar */}
         <div>
-        <CustomSidebar />
-      </div>
-        
+          <CustomSidebar />
+        </div>
+
         {/* Main Content Area with Header */}
         <div className="w-full flex flex-col">
           {/* Header */}
           <div className="sticky top-0 bg-white dark:bg-gray-800 p-4 shadow-md z-5 wl-full rounded-lg ml-6 mt-4 mr-6 flex justify-center items-center">
-             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vendor Management</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Vendor Management</h1>
           </div>
-          
+
           {/* Page Content */}
           <div className="p-8">
             <Card className="w-full bg-white dark:bg-gray-800 shadow-lg">
@@ -242,7 +231,7 @@ export default function VendorListView() {
                     />
                     <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   </div>
-                  <Button 
+                  <Button
                     className="bg-blue-700 hover:bg-blue-800 text-white"
                     onClick={openForm}
                   >
@@ -257,61 +246,44 @@ export default function VendorListView() {
                       <TableHead className="text-left dark:text-gray-300">Criticality</TableHead>
                       <TableHead className="text-left dark:text-gray-300">Status</TableHead>
                       <TableHead className="text-left dark:text-gray-300">Contact</TableHead>
+                      <TableHead className="text-left dark:text-gray-300">Service Provided</TableHead>
                     </TableRow>
                   </TableHeader>
-                  {/* <TableBody>
-                    {filteredVendors.map((vendor) => (
-                      <TableRow key={vendor.name} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <TableCell className="font-medium dark:text-gray-300">{vendor.name}</TableCell>
-                        <TableCell className="dark:text-gray-300">{vendor.type}</TableCell>
-                        <TableCell>
-                          <Badge className={`font-semibold ${getCriticalityColor(vendor.criticality)}`}>
-                            {vendor.criticality}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`font-semibold ${getStatusColor(vendor.status)}`}>
-                            {vendor.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="dark:text-gray-300">{vendor.contact}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody> */}
                   <TableBody>
-          {filteredVendors.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center dark:text-gray-300">
-                No vendors found
-              </TableCell>
-            </TableRow>
-          ) : (
-            filteredVendors.map((vendor) => (
-              <TableRow key={vendor.id || vendor.name} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <TableCell className="font-medium dark:text-gray-300">{vendor.name}</TableCell>
-                <TableCell className="dark:text-gray-300">{vendor.type}</TableCell>
-                <TableCell>
-                  <Badge className={`font-semibold ${getCriticalityColor(vendor.criticality)}`}>
-                    {vendor.criticality}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge className={`font-semibold ${getStatusColor(vendor.status)}`}>
-                    {vendor.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="dark:text-gray-300">{vendor.contact}</TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
+                    {filteredVendors.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center dark:text-gray-300">
+                          No vendors found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredVendors.map((vendor) => (
+                        <TableRow key={vendor.id || vendor.name} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <TableCell className="font-medium dark:text-gray-300">{vendor.name}</TableCell>
+                          <TableCell className="dark:text-gray-300">{vendor.type}</TableCell>
+                          <TableCell>
+                            <Badge className={`font-semibold ${getCriticalityColor(vendor.criticality)}`}>
+                              {vendor.criticality}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`font-semibold ${getStatusColor(vendor.status)}`}>
+                              {vendor.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="dark:text-gray-300">{vendor.contact}</TableCell>
+                          <TableCell className="dark:text-gray-300">{vendor.serviceProvided}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
                 </Table>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
-  
+
       {/* Add Vendor Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:text-gray-100">
@@ -333,23 +305,23 @@ export default function VendorListView() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-  <Label htmlFor="type" className="text-right dark:text-gray-300">
-    Type
-  </Label>
-  <Input
-    id="type"
-    placeholder="Enter vendor type"
-    value={formData.type}
-    onChange={(e) => handleSelectChange("type", e.target.value)}
-    className="col-span-3 dark:bg-gray-700 dark:text-gray-100"
-  />
-</div>
+              <Label htmlFor="type" className="text-right dark:text-gray-300">
+                Type
+              </Label>
+              <Input
+                id="type"
+                placeholder="Enter vendor type"
+                value={formData.type}
+                onChange={(e) => handleSelectChange("type", e.target.value)}
+                className="col-span-3 dark:bg-gray-700 dark:text-gray-100"
+              />
+            </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="criticality" className="text-right dark:text-gray-300">
                 Criticality
               </Label>
-              <Select 
-                onValueChange={(value) => handleSelectChange("criticality", value)} 
+              <Select
+                onValueChange={(value) => handleSelectChange("criticality", value)}
                 value={formData.criticality}
               >
                 <SelectTrigger className="col-span-3 dark:bg-gray-700 dark:text-gray-100">
@@ -367,8 +339,8 @@ export default function VendorListView() {
               <Label htmlFor="status" className="text-right dark:text-gray-300">
                 Status
               </Label>
-              <Select 
-                onValueChange={(value) => handleSelectChange("status", value)} 
+              <Select
+                onValueChange={(value) => handleSelectChange("status", value)}
                 value={formData.status}
               >
                 <SelectTrigger className="col-span-3 dark:bg-gray-700 dark:text-gray-100">
@@ -394,6 +366,19 @@ export default function VendorListView() {
                 placeholder="Enter contact email"
               />
             </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="serviceProvided" className="text-right dark:text-gray-300">
+                Service Provided
+              </Label>
+              <Input
+                id="serviceProvided"
+                name="serviceProvided"
+                value={formData.serviceProvided}
+                onChange={handleInputChange}
+                className="col-span-3 dark:bg-gray-700 dark:text-gray-100"
+                placeholder="Enter service provided"
+              />
+            </div>
           </div>
           <DialogFooter className="sm:justify-between">
             <DialogClose asChild>
@@ -401,9 +386,9 @@ export default function VendorListView() {
                 Cancel
               </Button>
             </DialogClose>
-            <Button 
-              type="submit" 
-              className="bg-blue-700 hover:bg-blue-800 text-white" 
+            <Button
+              type="submit"
+              className="bg-blue-700 hover:bg-blue-800 text-white"
               onClick={createVendor}
               disabled={!validateForm()}
             >

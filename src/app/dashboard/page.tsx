@@ -2,18 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { useUser, useClerk } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Moon, Sun, Search, Home, Users, FileText, Settings, LogOut, Info, Sidebar } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid,  Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import {  Search, Users} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import CustomSidebar from '@/components/CustomSidebar';
 
@@ -120,9 +117,9 @@ export default function EnhancedVendorDashboard() {
     fetchVendors()
   }, [])
 
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme)
-  }
+  // const toggleTheme = () => {
+  //   setIsDarkTheme(!isDarkTheme)
+  // }
 
   const filteredVendors = vendors.filter(vendor =>
     vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -159,9 +156,9 @@ export default function EnhancedVendorDashboard() {
   }
 
   // Toggle sidebar function
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
-  }
+  // const toggleSidebar = () => {
+  //   setIsSidebarOpen(!isSidebarOpen)
+  // }
 
   // Loading and error states
   if (isLoading) {

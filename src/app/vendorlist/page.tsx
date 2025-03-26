@@ -1,16 +1,15 @@
 'use client'
 
-import { useState,useRef, useEffect, MutableRefObject, RefObject } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { Moon, Sun, Search, X } from 'lucide-react'
+import { Search } from 'lucide-react'
 import CustomSidebar from '@/components/CustomSidebar'
 import axios from 'axios';
-import { useUser } from "@clerk/nextjs";
+
 import { v4 as uuidv4 } from "uuid";
 
 import { 
@@ -90,9 +89,9 @@ export default function VendorListView() {
   }, [])
 
 
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme)
-  }
+  // const toggleTheme = () => {
+  //   setIsDarkTheme(!isDarkTheme)
+  // }
 
   const openForm = () => {
     setFormData({

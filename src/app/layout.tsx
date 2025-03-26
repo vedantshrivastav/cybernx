@@ -1,9 +1,7 @@
 'use client'
-import AuthButtons from "@/components/auth-buttons";
 import { Suspense, useEffect, useState } from "react";
 import './globals.css';
 import Header from "@/components/Header";
-import LandingPage from "@/components/LandingPage";
 import { DarkModeProvider } from "@/components/darkModeContext";
 
 export default function RootLayout({

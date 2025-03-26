@@ -24,7 +24,21 @@ export default function Header() {
     return (
       <header className="w-full py-4">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <h1>Vendor's Hub</h1>
+          <h1 className={`text-2xl md:text-5xl font-bold mb-6 ${darkMode ? "text-white" : "text-gray-900"}`}>
+            <span
+              onClick={handleLogoClick}
+              className="text-blue-600 cursor-pointer"
+            >
+              Vendor&apos;s
+            </span>
+            {' '}
+            <span
+              onClick={handleLogoClick}
+              className="text-blue-600 cursor-pointer"
+            >
+              Hub
+            </span>
+          </h1>
         </div>
       </header>
     );
@@ -34,15 +48,15 @@ export default function Header() {
     <header className={`border-b ${darkMode ? "bg-gray-900 border-gray-700" : "bg-gray-100 border-gray-200"} w-full py-4`}>
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <h1 className={`text-2xl md:text-5xl font-bold mb-6  ${darkMode ? "text-white" : "text-gray-900"}`}>
-          <span 
-            onClick={handleLogoClick} 
+          <span
+            onClick={handleLogoClick}
             className="text-blue-600 cursor-pointer"
           >
             Vendor's
           </span>
           {' '}
-          <span 
-            onClick={handleLogoClick} 
+          <span
+            onClick={handleLogoClick}
             className="text-blue-600 cursor-pointer"
           >
             Hub

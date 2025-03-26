@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from './ui/button'
-import { ChevronLeft, ChevronRight, FileText, Home, LogOut, Users } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText, Home, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 // import { useClerk } from '@clerk/nextjs';
 

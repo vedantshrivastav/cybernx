@@ -16,7 +16,7 @@ export default function Header() {
   }, []);
 
   const handleLogoClick = () => {
-    router.push('/dashbord');
+    router.push('/dashboard');
   };
 
   // If not mounted, return null or a placeholder

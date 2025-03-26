@@ -34,7 +34,7 @@ export default function EnhancedVendorListView() {
     const fetchVendors = async () => {
       try {
         setIsLoading(true)
-        const response = await axios.get('http://localhost:5000/vendors')
+        const response = await axios.get('https://cybernx.onrender.com/vendors')
         
         const vendorsData = Array.isArray(response.data) 
           ? response.data 

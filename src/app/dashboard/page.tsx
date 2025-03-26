@@ -82,7 +82,7 @@ export default function EnhancedVendorDashboard() {
       try {
         setIsLoading(true)
         // Replace with your actual backend endpoint
-        const response = await axios.get('http://localhost:5000/vendors')
+        const response = await axios.get('https://cybernx.onrender.com/vendors')
 
         // Log the entire response to understand its structure
         console.log("Full response:", response.data)

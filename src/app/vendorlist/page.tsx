@@ -59,7 +59,7 @@ export default function VendorListView() {
       try {
         setIsLoading(true)
         // Replace with your actual backend endpoint
-        const response = await axios.get('http://localhost:5000/vendors')
+        const response = await axios.get('https://cybernx.onrender.com/vendors')
         
         // Log the entire response to understand its structure
         console.log("Full response:", response.data)
@@ -128,7 +128,7 @@ export default function VendorListView() {
         ...formData
     };
 
-    const API_URL = "http://localhost:5000/vendors";
+    const API_URL = "https://cybernx.onrender.com/vendors";
 
     try {
         const response = await axios.post(API_URL, newVendor, { // Send `newVendor` instead of `formData`
